@@ -7,28 +7,23 @@ const toggle = player.querySelector('.toggle');
 const skipButtons = player.querySelectorAll('[data-skip]'); 
 const ranges = player.querySelectorAll('.player__slider'); 
 const controlFullScreen = player.querySelector('.player__fullscreen');
+const image = document.querySelector(".video-overlay");
+
 
 /* Build out functions*/
 function togglePlay() {
-    console.log("456")
     const method = video.paused ? 'play' : 'pause';
     video[method]();
-    // if (video.paused){
-    //     video.play();
-    // }else{
-    //     video.pause();
-    // }
 }
 
 function updateButton(){
-    console.log("123")
-    const icon = this.paused ? '►' : '❚❚';
+    const icon = (this.paused)? '►':'❚❚';
     toggle.textContent = icon;
-
+    image.style.display = "none";
 }
 
+
 function skip(){
-    console.log(this.dataset.skip);
     video.currentTime += parseFloat(this.dataset.skip);
 }
 
@@ -39,6 +34,12 @@ function handleRangeUpdate(){
 function handleProgress(){
     const percent = (video.currentTime / video.duration) * 100;
     progressBar.style.flexBasis = `${percent}%`;
+}
+
+function scrub(e){
+    const scrubTime = (e.offsetX / progress.offsetWidth) * video.duration;
+    video.currentTime = scrubTime;
+    console.log(e);
 }
 
 function fullScreen(){
@@ -58,6 +59,11 @@ video.addEventListener('click', togglePlay);
 video.addEventListener('pause', updateButton);
 toggle.addEventListener('click', togglePlay);
 video.addEventListener('play', updateButton);
+image.onclick = function(){
+    this.style.display = "none";
+    const method = video.paused ? 'play' : 'pause';
+    video[method]();
+}
 
 video.addEventListener('timeupdate', handleProgress);
 controlFullScreen.addEventListener('click', fullScreen); 
@@ -65,3 +71,10 @@ controlFullScreen.addEventListener('click', fullScreen);
 skipButtons.forEach(button => button.addEventListener('click', skip));
 ranges.forEach(range => range.addEventListener('change',handleRangeUpdate));
 ranges.forEach(range => range.addEventListener('mousemove',handleRangeUpdate));
+
+
+let mousedown = false;
+progress.addEventListener('click', scrub);
+progress.addEventListener('mousemove', (e) => mousedown && scrub(e));
+progress.addEventListener('mousedown', () => mousedown = true);
+progress.addEventListener('mouseup', () => mousedown = false);
